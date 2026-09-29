@@ -1,6 +1,6 @@
-import { getOwnerSession } from "../../../../_shared/auth.js";
-import { errorResponse, isSameOrigin, json, problem, readJson } from "../../../../_shared/http.js";
-import { normalizeProduct } from "../../../../_shared/products.js";
+import { getOwnerSession } from "../../../_shared/auth.js";
+import { errorResponse, isSameOrigin, json, problem, readJson } from "../../../_shared/http.js";
+import { normalizeProduct } from "../../../_shared/products.js";
 
 export async function onRequestPut({ request, env, params }) {
   try {
