@@ -1,0 +1,9 @@
+{
+  "name": "rs-square-fitness-supplements",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "seed:cloudflare": "node scripts/create-seed-migration.mjs"
+  }
+}
