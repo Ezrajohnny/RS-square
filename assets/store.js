@@ -1,6 +1,8 @@
 (async () => {
   'use strict';
 
+  const MYBILLBOOK_STORE_URL = 'https://mybillbook.in/store/r_s_supplements';
+
   let products = window.RS_CATALOG || [];
   try {
     const response = await fetch('/api/products',{cache:'no-store'});
@@ -269,7 +271,10 @@
     $('cartCount').textContent = count;
     $('cartLineCount').textContent = '(' + count + ')';
     $('cartSubtotal').textContent = formatMoney(subtotalCents / 100);
+    $('pickupOrder').disabled = count === 0;
     $('whatsappOrder').disabled = count === 0;
+    $('myBillBookOrder').disabled = count === 0;
+    $('myBillBookNote').hidden = count === 0;
     if (!validRows.length) {
       $('cartLines').innerHTML = '<div class="cart-empty">Your cart is empty.<br>Find a product in the catalogue to get started.</div>';
       return;
@@ -283,8 +288,14 @@
     $('cartLines').querySelectorAll('[data-remove]').forEach(button => button.addEventListener('click',() => removeCartItem(button.dataset.remove)));
     wireImageFallbacks($('cartLines'));
   }
-  function buildWhatsAppOrder() {
-    const lines = ['Hello R.S. Supplements, I would like to place this order:'];
+  function buildWhatsAppOrder(intent = 'order') {
+    const isPickup = intent === 'pickup';
+    const isBulk = intent === 'bulk';
+    const lines = [isPickup
+      ? 'Hello R.S. Supplements, I would like to reserve this order for pickup at the store:'
+      : isBulk
+        ? 'Hello R.S. Supplements, I would like to discuss this bulk order:'
+        : 'Hello R.S. Supplements, I would like to place this order:'];
     let subtotalCents = 0;
     for (const [id,qty] of state.cart.entries()) {
       const row = variantById.get(id);
@@ -294,7 +305,9 @@
       subtotalCents += Math.round(row.variant.price * 100) * qty;
     }
     lines.push('Subtotal: ' + formatMoney(subtotalCents / 100));
-    lines.push('Please confirm availability and delivery details.');
+    lines.push(isPickup
+      ? 'Please confirm availability and when I can collect it.'
+      : 'Please confirm availability, delivery, and payment details.');
     return 'https://wa.me/919952392499?text=' + encodeURIComponent(lines.join('\n'));
   }
 
@@ -318,7 +331,11 @@
     event.currentTarget.setAttribute('aria-expanded',String(open)); event.currentTarget.textContent = open ? '×' : '☰';
   });
   document.querySelectorAll('#mainNav a').forEach(link => link.addEventListener('click',() => { $('mainNav').classList.remove('open'); $('menuToggle').setAttribute('aria-expanded','false'); $('menuToggle').textContent = '☰'; }));
-  $('whatsappOrder').addEventListener('click',() => { if (state.cart.size) window.open(buildWhatsAppOrder(),'_blank','noopener'); });
+  $('pickupOrder').addEventListener('click',() => { if (state.cart.size) window.open(buildWhatsAppOrder('pickup'),'_blank','noopener'); });
+  $('whatsappOrder').addEventListener('click',() => { if (state.cart.size) window.open(buildWhatsAppOrder('bulk'),'_blank','noopener'); });
+  $('myBillBookOrder').addEventListener('click',() => {
+    if (state.cart.size) window.open(MYBILLBOOK_STORE_URL,'_blank','noopener');
+  });
   window.addEventListener('hashchange',() => {
     const match = location.hash.match(/^#product\/(.+)$/);
     if (match && productById.has(match[1])) openDetail(match[1],productById.get(match[1]).variants[0].id,false);
