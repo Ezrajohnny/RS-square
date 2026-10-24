@@ -20,26 +20,21 @@ const slugify = value => value.toLocaleLowerCase().normalize("NFKD")
 async function saveUploadedImage(data, env) {
   const match = String(data).match(/^data:image\/(webp|jpeg|png|gif);base64,([A-Za-z0-9+/=]+)$/);
   if (!match) throw problem("Upload a JPG, PNG, WebP, or GIF product image.");
-  if (match[2].length > 11 * 1024 * 1024) throw problem("Product images must be smaller than 8 MB.");
-  if (!env.PRODUCT_IMAGES) throw problem("Product image storage is not connected yet.", 503);
+  if (match[2].length > 1_600_100) throw problem("Product images must be smaller than 1.2 MB after optimization.");
   let binary;
   try {
     binary = atob(match[2]);
   } catch {
     throw problem("The product image could not be read.");
   }
-  if (!binary.length || binary.length > 8 * 1024 * 1024) {
-    throw problem("Product images must be smaller than 8 MB.");
+  if (!binary.length || binary.length > 1_200_000) {
+    throw problem("Product images must be smaller than 1.2 MB after optimization.");
   }
-  const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
   const extension = match[1] === "jpeg" ? "jpg" : match[1];
   const key = crypto.randomUUID() + "." + extension;
-  await env.PRODUCT_IMAGES.put(key, bytes, {
-    httpMetadata: {
-      contentType: "image/" + match[1],
-      cacheControl: "public, max-age=31536000, immutable",
-    },
-  });
+  await env.DB.prepare(
+    "INSERT INTO product_images (id, image_data, uploaded_at) VALUES (?, ?, ?)",
+  ).bind(key, "data:image/" + match[1] + ";base64," + match[2], new Date().toISOString()).run();
   return "/api/images/" + key;
 }
 

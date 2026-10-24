@@ -85,14 +85,17 @@
     }));
     $('variantEditor').querySelectorAll('[data-file]').forEach(input=>input.addEventListener('change',async()=>{
       const file=input.files&&input.files[0];if(!file)return;if(!file.type.startsWith('image/')){toast('Choose a product image file.');return;}
-      try{const data=await optimizeImage(file);const item=state.editorVariants[Number(input.closest('[data-variant]').dataset.variant)];item.imageData=data;item.image='';const preview=input.closest('[data-variant]').querySelector('[data-image-preview]');preview.innerHTML='<img src="'+data+'" alt=""><span>New image ready to save</span>';const urlInput=input.closest('[data-variant]').querySelector('[data-field="image"]');urlInput.value='';}
-      catch(_){toast('Could not read that image. Choose another file.');}
+      try{const data=await optimizeImage(file);const item=state.editorVariants[Number(input.closest('[data-variant]').dataset.variant)];item.imageData=data;item.image='';const preview=input.closest('[data-variant]').querySelector('[data-image-preview]');preview.innerHTML='<img src="'+data+'" alt=""><span>Preview only — click Save product</span>';const urlInput=input.closest('[data-variant]').querySelector('[data-field="image"]');urlInput.value='';}
+      catch(error){toast(error.message||'Could not read that image. Choose another file.');}
     }));
     $('variantEditor').querySelectorAll('[data-remove-variant]').forEach(button=>button.addEventListener('click',()=>{state.editorVariants.splice(Number(button.dataset.removeVariant),1);renderVariants();}));
   }
   async function optimizeImage(file){
-    let bitmap;try{bitmap=await createImageBitmap(file);}catch(_){const url=URL.createObjectURL(file);bitmap=await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Could not open image.'))};img.src=url;});}
-    const scale=Math.min(1,1400/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);if(bitmap.close)bitmap.close();return new Promise((resolve,reject)=>canvas.toBlob(blob=>{if(!blob)return reject(new Error('Could not prepare image.'));const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob);},'image/webp',.84));
+    let bitmap;try{bitmap=await createImageBitmap(file);}catch(_){const url=URL.createObjectURL(file);bitmap=await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);resolve(img);};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Could not open image.'));};img.src=url;});}
+    let scale=Math.min(1,1400/Math.max(bitmap.width,bitmap.height));let blob;const canvas=document.createElement('canvas');
+    for(let sizePass=0;sizePass<5;sizePass++){canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);for(const quality of [.8,.72,.64,.56,.48]){blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',quality));if(blob&&blob.size<=1200000)break;}if(blob&&blob.size<=1200000)break;scale*=.8;}
+    if(bitmap.close)bitmap.close();if(!blob||blob.size>1200000)throw new Error('This product image is too large to store. Choose a smaller image.');
+    return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob);});
   }
   async function optimizeGalleryImage(file){
     let bitmap;try{bitmap=await createImageBitmap(file);}catch(_){const url=URL.createObjectURL(file);bitmap=await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Could not open that photo.'))};img.src=url;});}
@@ -126,7 +129,7 @@
     try{const result=await api(id?'/api/admin/products/'+encodeURIComponent(id):'/api/admin/products',{method:id?'PUT':'POST',body:JSON.stringify({product})});
       const index=state.products.findIndex(item=>item.id===result.product.id);if(index<0)state.products.unshift(result.product);else state.products[index]=result.product;
       dialog.close();renderProducts();displayStatus('Product saved and storefront updated.');toast('Product saved.');
-    }catch(error){toast(error.message);}
+    }catch(error){displayStatus(error.message,true);toast(error.message);}
     finally{$('saveProduct').disabled=false;$('saveProduct').textContent='Save product';}
   }
   async function init(){
