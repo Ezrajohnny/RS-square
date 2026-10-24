@@ -8,7 +8,57 @@
     const response = await fetch('/api/products',{cache:'no-store'});
     if (response.ok) { const savedProducts = await response.json(); if (Array.isArray(savedProducts)) { products = savedProducts; window.RS_CATALOG = products; } }
   } catch (_) {}
-  const categories = ['Whey Protein','Isolate Protein','Creatine','Mass Gainers','Pre-Workout','Amino Acids','Vitamins & Minerals','Fish Oil & Wellness','Other Supplements'];
+  const categories = ['BCAA / Amino Acids','Collagen','Creatine','Fat Burner','Mass Gainer','Multivitamin','Omega / Fish Oil','Pre-Workout','Whey Protein'];
+  const categoryAliases = {
+    'BCAA / Amino Acids':'BCAA / Amino Acids',
+    'Amino Acids':'BCAA / Amino Acids',
+    'Collagen':'Collagen',
+    'Creatine':'Creatine',
+    'Fat Burner':'Fat Burner',
+    'Fish Oil & Wellness':'Omega / Fish Oil',
+    'Isolate Protein':'Whey Protein',
+    'Isolate Whey':'Whey Protein',
+    'Mass Gainer':'Mass Gainer',
+    'Mass Gainers':'Mass Gainer',
+    'Multivitamin':'Multivitamin',
+    'Omega / Fish Oil':'Omega / Fish Oil',
+    'Pre-Workout':'Pre-Workout',
+    'Performance Whey':'Whey Protein',
+    'Vitamins & Minerals':'Multivitamin',
+    'Whey Protein':'Whey Protein'
+  };
+  const productBrands = {
+    'omega-3-90-capsules':'ALLMAX','vitaform-men':'ALLMAX','iso-hydro':'Americanz Muscles',
+    'stim-load':'Blood Lock','instant-whey':'Davisco','cla':'Elev','collagen-extreme':'Elev',
+    'creatine-extreme':'Elev','eaa':'Elev','glutamine-300g':'Elev','l-arginine':'Elev',
+    'l-carni-blast':'Elev','mass-matrix-with-creatine':'Elev','whey-protein':'Foodstrong',
+    'my-whey':'Gibbon','creatine-blueberry':'GNC','pp-100-whey':'GNC','armour-whey':'GXN',
+    'collagen-india':'Isopure','creatine-monohydrate-india':'Isopure',
+    'low-carb-dutch-chocolate-india':'Isopure','scatterbrain':'Kevin Levrone',
+    'shaaboom-pump':'Kevin Levrone','mass-gainer-xxl':'MuscleBlaze','pre-workout-wrathx':'MuscleBlaze',
+    'glutamine-250g':'MuscleTech','creatine-monohydrate-unflavoured-250g':'MuscleTech',
+    'multivitamin':'MuscleTech','mass-extreme':'Mutant','whey-triple-chocolate':'Mutant',
+    'bcaa-2-1-1':'Myprotein','creatine-lemon-mint':'Myprotein',
+    'creatine-monohydrate-250g':'Myprotein','creatine-monohydrate-unflavoured-100g':'Myprotein',
+    'omega-3-softgels':'Myvitamins','bcaa-5000':'Optimum Nutrition',
+    'on-creatine-citrus-orange':'Optimum Nutrition','fish-oil-india':'Optimum Nutrition',
+    'l-glutamine-powder':'Optimum Nutrition','serious-mass':'Optimum Nutrition',
+    'performance-whey':'Optimum Nutrition','multivitamin-for-men':'Optimum Nutrition',
+    'on-gold-standard-whey':'Optimum Nutrition','on-100-whey':'Optimum Nutrition',
+    'on-gold-standard-pre-workout':'Optimum Nutrition','nitro-whey':'One Science',
+    'premium-whey':'One Science','pre-workout-35-servings':'Psychotic',
+    'king-whey-protein':'Ronnie Coleman','pro-30-capsules':'Svelte','bcaa-unspecified':'Xtend'
+  };
+  const productCategoryOverrides = {
+    'cla':'Fat Burner','collagen-extreme':'Collagen','collagen-india':'Collagen',
+    'l-carni-blast':'Fat Burner','low-carb-dutch-chocolate-india':'Whey Protein',
+    'musclepharm-product-details':'Whey Protein','pro-30-capsules':'Fat Burner'
+  };
+  products = products.map(product => ({
+    ...product,
+    brand: productBrands[product.id] || (product.brand && product.brand !== 'Brand not specified' ? (product.brand === 'ON' ? 'Optimum Nutrition' : product.brand) : ''),
+    category: productCategoryOverrides[product.id] || categoryAliases[product.category] || 'Whey Protein'
+  }));
   const variantList = products.flatMap(product => product.variants.map(variant => ({ product, variant })));
   const variantById = new Map(variantList.map(row => [row.variant.id, row]));
   const productById = new Map(products.map(product => [product.id, product]));
@@ -32,14 +82,14 @@
     return (variantDescription(variant) || 'Product details not supplied') + ' · ' + formatMoney(variant.price);
   }
   function imageAlt(product, variant) {
-    return [product.brand !== 'Brand not specified' ? product.brand : '', product.name, variant.flavor, variant.origin, variant.size].filter(Boolean).join(' — ');
+    return [product.brand, product.name, variant.flavor, variant.origin, variant.size].filter(Boolean).join(' — ');
   }
   function placeholderMarkup(product, variant) {
     const details = variantDescription(variant);
     return '<div class="placeholder-image" role="img" aria-label="Packshot not supplied for ' + esc(imageAlt(product,variant)) + '">' +
       '<span class="placeholder-mark">RS</span><span class="placeholder-brand">R.S. Supplements · packshot pending</span>' +
       '<strong class="placeholder-name">' + esc(product.name) + '</strong>' +
-      '<span class="placeholder-variant">' + esc(details || (product.brand !== 'Brand not specified' ? product.brand : 'Product details not supplied')) + '</span>' +
+      '<span class="placeholder-variant">' + esc(details || product.brand || 'Product details not supplied') + '</span>' +
       '<span class="placeholder-needed">Owner can add a matching product packshot</span></div>';
   }
   function imageMarkup(product, variant, className) {
@@ -103,16 +153,17 @@
     const text = [product.name,product.brand,product.category,...variants.flatMap(v => [v.flavor,v.origin,v.size])].join(' ').toLocaleLowerCase();
     return text.includes(query);
   }
-  function cardMarkup(product, variant, availableVariants) {
+  function cardMarkup(product, variant, availableVariants, showBrand = true) {
     const familyVariantCount = product.variants.length;
     const matchedVariants = availableVariants || product.variants;
     const shownPrice = matchedVariants.length > 1 ? 'From ' + formatMoney(Math.min(...matchedVariants.map(v => v.price))) : formatMoney(variant.price);
     const optionNote = variantDescription(variant) || 'Variant details not supplied';
     const itemCount = familyVariantCount === 1 ? '1 variant' : familyVariantCount + ' variants';
-    const imageTag = product.brand !== 'Brand not specified' ? '<span class="image-brand-tag">' + esc(product.brand) + '</span>' : '';
+    const imageTag = showBrand && product.brand ? '<span class="image-brand-tag">' + esc(product.brand) + '</span>' : '';
+    const brandLine = showBrand && product.brand ? '<div class="brand-line">' + esc(product.brand) + '</div>' : '';
     return '<article class="product-card">' +
       '<div class="product-image-box">' + imageTag + imageMarkup(product,variant,'product-image') + '</div>' +
-      '<div class="card-content"><div class="brand-line">' + esc(product.brand) + ' · ' + esc(product.category) + '</div>' +
+      '<div class="card-content">' + brandLine +
       '<h3>' + esc(product.name) + '</h3><div class="variant-caption">' + esc(optionNote) + '</div>' +
       '<div class="card-meta"><span class="price">' + shownPrice + '</span><span class="variant-count">' + itemCount + '</span></div>' +
       '<div class="card-actions"><button type="button" data-detail="' + esc(product.id) + '" data-variant="' + esc(variant.id) + '">View details</button>' +
@@ -154,7 +205,28 @@
     rows = sortRows(rows,filters.sort);
     const matchedVariants = products.reduce((count,product) => count + getMatchingVariants(product,filters).filter(v => matchesSearch(product,[v],filters.query) && (!filters.brand || product.brand === filters.brand) && (!filters.category || product.category === filters.category)).length,0);
     $('resultsCount').textContent = rows.length + ' product listings · ' + matchedVariants + ' matching variants';
-    renderCards($('catalogGrid'),rows);
+    const root = $('catalogGrid');
+    if (!rows.length) {
+      root.innerHTML = '<div class="empty-results">No products match these filters.<br>Try clearing one or more filters.</div>';
+      return;
+    }
+    root.innerHTML = categories.map(category => {
+      const categoryRows = rows.filter(row => row.product.category === category);
+      if (!categoryRows.length) return '';
+      const brandGroups = new Map();
+      categoryRows.forEach(row => {
+        const brand = row.product.brand || '';
+        if (!brandGroups.has(brand)) brandGroups.set(brand,[]);
+        brandGroups.get(brand).push(row);
+      });
+      const groups = [...brandGroups.entries()].sort((a,b) => a[0].localeCompare(b[0],'en'));
+      return '<section class="catalog-category" id="category-' + categorySlug(category) + '">' +
+        '<div class="catalog-category-head"><h3>' + esc(category) + '</h3><span>' + categoryRows.length + (categoryRows.length === 1 ? ' product' : ' products') + '</span></div>' +
+        groups.map(([brand,brandRows]) => (brand ? '<h4 class="catalog-brand-head">' + esc(brand) + '</h4>' : '') +
+          '<div class="product-grid">' + brandRows.map(row => cardMarkup(row.product,row.variant,row.variants,false)).join('') + '</div>').join('') +
+        '</section>';
+    }).join('');
+    wireCardButtons(root);
   }
   function renderFeatured() {
     const featuredRows = products.filter(product => product.featured).map(product => ({product,variant:product.variants.slice().sort((a,b) => a.price - b.price)[0]}));
@@ -165,8 +237,11 @@
     select.innerHTML = '<option value="">' + esc(firstLabel) + '</option>' + values.map(value => '<option value="' + esc(value) + '">' + esc(value) + '</option>').join('');
     if (values.includes(previous)) select.value = previous;
   }
+  function categorySlug(category) {
+    return category.toLocaleLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  }
   function initFilters() {
-    const brands = unique(products.map(p => p.brand)).sort((a,b) => a.localeCompare(b,'en'));
+    const brands = unique(products.map(p => p.brand).filter(Boolean)).sort((a,b) => a.localeCompare(b,'en'));
     const flavors = unique(variantList.map(row => row.variant.flavor).filter(Boolean)).sort((a,b) => a.localeCompare(b,'en'));
     const sizes = unique(variantList.map(row => row.variant.size).filter(Boolean)).sort((a,b) => a.localeCompare(b,'en'));
     setOptions($('brandFilter'),brands,'All brands');
@@ -174,18 +249,12 @@
     setOptions($('flavorFilter'),flavors,'All flavors');
     setOptions($('sizeFilter'),sizes,'All sizes');
     const strip = $('supplementCategories');
-    strip.innerHTML = '<span>Shop category</span><button class="category-chip active" type="button" data-category="">All products</button>' + categories.map(category => '<button class="category-chip" type="button" data-category="' + esc(category) + '">' + esc(category) + '</button>').join('');
-    strip.querySelectorAll('[data-category]').forEach(button => button.addEventListener('click',() => {
-      $('categoryFilter').value = button.dataset.category;
-      strip.querySelectorAll('.category-chip').forEach(chip => chip.classList.toggle('active',chip === button));
-      renderCatalog();
-      location.hash = 'catalog';
-    }));
+    strip.innerHTML = '<span>Shop category</span><a class="category-chip active" href="#catalog" data-category="">All products</a>' + categories.map(category => '<a class="category-chip" href="#category-' + categorySlug(category) + '" data-category="' + esc(category) + '">' + esc(category) + '</a>').join('');
     $('catalogIntro').textContent = products.length + ' product listings · ' + variantList.length + ' catalog variants. Product details, flavors, sizes, and prices follow the supplied catalogue.';
   }
   function updateCategoryChip() {
     const value = $('categoryFilter').value;
-    document.querySelectorAll('.category-chip').forEach(button => button.classList.toggle('active',button.dataset.category === value));
+    document.querySelectorAll('.category-chip').forEach(link => link.classList.toggle('active',link.dataset.category === value));
   }
 
   function openDetail(productId,variantId,pushHash) {
@@ -222,7 +291,7 @@
     facts.push(['Category',product.category]);
     const review = variant.review ? '<div class="detail-review">' + esc(variant.review) + '</div>' : '';
     $('detailContent').innerHTML = '<div class="detail-layout"><div class="detail-image">' + imageMarkup(product,variant,'product-image') + '</div>' +
-      '<div class="detail-info"><div class="detail-brand">' + esc(product.brand) + '</div><h2>' + esc(product.name) + '</h2><span class="detail-category">' + esc(product.category) + '</span>' +
+      '<div class="detail-info">' + (product.brand ? '<div class="detail-brand">' + esc(product.brand) + '</div>' : '') + '<h2>' + esc(product.name) + '</h2><span class="detail-category">' + esc(product.category) + '</span>' +
       '<div class="detail-price">' + formatMoney(variant.price) + '</div>' +
       '<div class="detail-options">' + selectorMarkup('Flavor','flavor',flavors,variant.flavor) + selectorMarkup('Size','size',sizes,variant.size) + '</div>' +
       '<div class="detail-facts">' + facts.map(f => '<div class="detail-fact"><span>' + esc(f[0]) + '</span><strong>' + esc(f[1]) + '</strong></div>').join('') + '</div>' + review +
