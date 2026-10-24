@@ -25,7 +25,7 @@
     p('iso-hydro','Iso Hydro','Brand not specified','Isolate Protein',[v('iso-hydro-5lb','', '5lb',6951.02,[9])]),
     p('americanz-muscles-professional-protein','Americanz Muscles Professional Protein','Americanz Muscles','Whey Protein',[v('americanz-muscles-professional-protein-5lb','', '5lb',5317.81,[10])]),
     p('stim-load','Stim Load','Brand not specified','Pre-Workout',[v('stim-load-60-servings','', '60 servings',2068.50,[11])]),
-    p('instant-whey','Instant Whey','Brand not specified','Whey Protein',[v('instant-whey-1kg','', '1kg',1609.65,[12],'assets/products/muscleblaze-turbo-whey.jpg')]),
+    p('instant-whey','Instant Whey','Brand not specified','Whey Protein',[v('instant-whey-1kg','', '1kg',1609.65,[12])]),
     p('cla','CLA','Brand not specified','Fish Oil & Wellness',[v('cla-60-capsules','', '60 capsules',929.25,[13])]),
     p('collagen-extreme','Collagen Extreme','Brand not specified','Fish Oil & Wellness',[v('collagen-extreme-300g','', '300g',1454.25,[14])]),
     p('creatine-extreme','Creatine Extreme','Brand not specified','Creatine',[
@@ -43,18 +43,18 @@
     p('mass-matrix-with-creatine','Mass Matrix with Creatine','Brand not specified','Mass Gainers',[v('mass-matrix-with-creatine-3kg-plus-250g','', '3kg + 250g Creatine',2305.19,[23])]),
     p('elev-tri-whey','Tri Whey','Elev','Whey Protein',[
       v('elev-tri-whey-1kg','', '1kg',2785.21,[24]),
-      v('elev-tri-whey-23kg','', '2.3kg',5185.20,[25],'assets/products/elev-tri-whey.jpg')
+      v('elev-tri-whey-23kg','', '2.3kg',5185.20,[25])
     ]),
-    p('whey-protein','Whey Protein','Brand not specified','Whey Protein',[v('whey-protein-chocolate-4lb','Chocolate','4lb',3637.80,[26],'assets/products/bpi-whey-hd.jpg')]),
+    p('whey-protein','Whey Protein','Brand not specified','Whey Protein',[v('whey-protein-chocolate-4lb','Chocolate','4lb',3637.80,[26])]),
     p('my-whey','My Whey','Brand not specified','Whey Protein',[v('my-whey-chocolate-2kg','Chocolate','2kg',3624.00,[27])]),
     p('creatine-blueberry','Creatine','Brand not specified','Creatine',[v('creatine-blueberry-100g','Blueberry','100g',431.55,[28])]),
-    p('pp-100-whey','PP 100% Whey','Brand not specified','Whey Protein',[v('pp-100-whey-1kg','', '1kg',3549.00,[29],'assets/products/gnc-pro-performance-whey.jpg')]),
-    p('armour-whey','Armour Whey','Brand not specified','Whey Protein',[v('armour-whey-1kg','', '1kg',2100.00,[30],'assets/products/armour-whey.jpg')]),
+    p('pp-100-whey','PP 100% Whey','Brand not specified','Whey Protein',[v('pp-100-whey-1kg','', '1kg',3549.00,[29])]),
+    p('armour-whey','Armour Whey','Brand not specified','Whey Protein',[v('armour-whey-1kg','', '1kg',2100.00,[30])]),
     p('collagen-india','Collagen','Brand not specified','Fish Oil & Wellness',[v('collagen-india-250g','','250g',1818.92,[31],'','','','India')]),
     p('creatine-monohydrate-india','Creatine Monohydrate','Brand not specified','Creatine',[v('creatine-monohydrate-india-250g','','250g',1099.00,[32],'','','','India')]),
     p('low-carb-dutch-chocolate-india','Low Carb','Brand not specified','Other Supplements',[
       v('low-carb-dutch-chocolate-india-1kg','Dutch Chocolate','1kg',6928.95,[33],'','','','India'),
-      v('low-carb-dutch-chocolate-india-2kg','Dutch Chocolate','2kg',13099.00,[34],'assets/products/isopure-low-carb-dutch-chocolate.jpg','','','India')
+      v('low-carb-dutch-chocolate-india-2kg','Dutch Chocolate','2kg',13099.00,[34],'','','','India')
     ]),
     p('scatterbrain','Scatterbrain','Brand not specified','Pre-Workout',[v('scatterbrain','', '',1911.00,[35])]),
     p('shaaboom-pump','Shaaboom Pump','Brand not specified','Pre-Workout',[v('shaaboom-pump','', '',1865.02,[36])]),
@@ -65,8 +65,8 @@
       v('biozyme-performance-whey-magical-mango-22lb','Magical Mango','2.2lb',3838.80,[40],'assets/products/mb-biozyme-performance-whey-magical-mango-2.2lb.jpg','https://www.muscleblaze.com/sv/muscleblaze-biozyme-performance-whey/SP-88093?navKey=VRNT-166783')
     ],true),
     p('mass-gainer-xxl','Mass Gainer XXL','Brand not specified','Mass Gainers',[v('mass-gainer-xxl-chocolate-66lb','Chocolate','6.6lb',3400.00,[41])]),
-    p('pre-workout-wrathx','Pre Workout WrathX','Brand not specified','Pre-Workout',[v('pre-workout-wrathx-cola-frost-270g','Cola Frost','270g',899.00,[42],'assets/products/muscleblaze-wrath.jpg')]),
-    p('musclepharm-product-details','MusclePharm — Product details to be confirmed','MusclePharm','Other Supplements',[v('musclepharm-product-details-to-confirm','', '',7699.00,[43],'assets/products/musclepharm-combat-whey.jpg')]),
+    p('pre-workout-wrathx','Pre Workout WrathX','Brand not specified','Pre-Workout',[v('pre-workout-wrathx-cola-frost-270g','Cola Frost','270g',899.00,[42])]),
+    p('musclepharm-product-details','MusclePharm — Product details to be confirmed','MusclePharm','Other Supplements',[v('musclepharm-product-details-to-confirm','', '',7699.00,[43])]),
     p('glutamine-250g','Glutamine','Brand not specified','Amino Acids',[v('glutamine-250g','', '250g',763.50,[44])]),
     p('creatine-monohydrate-unflavoured-250g','Creatine Monohydrate','Brand not specified','Creatine',[v('creatine-monohydrate-unflavoured-250g','Unflavoured','250g',800.63,[45])]),
     p('multivitamin','Multivitamin','Brand not specified','Vitamins & Minerals',[v('multivitamin-60-tablets','', '60 tablets',763.50,[46])]),
@@ -76,7 +76,7 @@
     p('bcaa-2-1-1','BCAA 2:1:1','Brand not specified','Amino Acids',[v('bcaa-2-1-1-blue-raspberry-250g','Blue Raspberry','250g',852.53,[50])]),
     p('creatine-lemon-mint','Creatine','Brand not specified','Creatine',[v('creatine-lemon-mint-250g','Lemon & Mint','250g',683.77,[51])]),
     p('creatine-monohydrate-250g','Creatine Monohydrate','Brand not specified','Creatine',[v('creatine-monohydrate-250g','', '250g',683.77,[52])]),
-    p('creatine-monohydrate-unflavoured-100g','Creatine Monohydrate','Brand not specified','Creatine',[v('creatine-monohydrate-unflavoured-100g','Unflavoured','100g',380.04,[53],'assets/products/gnc-creatine-monohydrate.jpg')]),
+    p('creatine-monohydrate-unflavoured-100g','Creatine Monohydrate','Brand not specified','Creatine',[v('creatine-monohydrate-unflavoured-100g','Unflavoured','100g',380.04,[53])]),
     p('myprotein-impact-whey-isolate','Impact Whey Isolate','Myprotein','Isolate Protein',[
       v('myprotein-impact-whey-isolate-cpb-25kg','Chocolate Peanut Butter','2.5kg',10837.81,[54]),
       v('myprotein-impact-whey-isolate-matcha-latte-1kg','Matcha Latte','1kg',4837.79,[55])
@@ -92,7 +92,7 @@
     ]),
     p('on-creatine-citrus-orange','Creatine','ON','Creatine',[
       v('on-creatine-citrus-orange-100g','Citrus Orange','100g',599.00,[61]),
-      v('on-creatine-citrus-orange-250g','Citrus Orange','250g',999.00,[62,63],'assets/products/on-creatine-tangy-orange.jpg')
+      v('on-creatine-citrus-orange-250g','Citrus Orange','250g',999.00,[62,63])
     ]),
     p('fish-oil-india','Fish Oil','Brand not specified','Fish Oil & Wellness',[v('fish-oil-india-60-capsules','','60 capsules',577.50,[64],'','','','India')]),
     p('on-gold-standard-whey','Gold Standard Whey','ON','Whey Protein',[
@@ -110,13 +110,13 @@
     p('l-glutamine-powder','L-Glutamine Powder','Brand not specified','Amino Acids',[v('l-glutamine-powder-india-250g','','250g',998.28,[71],'','','','India')]),
     p('serious-mass','Serious Mass','ON','Mass Gainers',[v('serious-mass-vanilla-3kg','Vanilla','3kg',4059.00,[72])]),
     p('performance-whey','Performance Whey','Brand not specified','Whey Protein',[
-      v('performance-whey-chocolate-1kg','Chocolate','1kg',4156.07,[73],'assets/products/ronnie-coleman-pro-antium.jpg'),
-      v('performance-whey-chocolate-2kg','Chocolate','2kg',6720.00,[74],'assets/products/larry-wheels-whey.jpg')
+      v('performance-whey-chocolate-1kg','Chocolate','1kg',4156.07,[73]),
+      v('performance-whey-chocolate-2kg','Chocolate','2kg',6720.00,[74])
     ]),
     p('multivitamin-for-men','Multivitamin for Men','Brand not specified','Vitamins & Minerals',[v('multivitamin-for-men-60-tablets','', '60 tablets',745.50,[75])]),
-    p('nitro-whey','Nitro Whey','Brand not specified','Whey Protein',[v('nitro-whey-181kg','', '1.81kg',6577.81,[77],'assets/products/muscletech-advanced-whey-protein.jpg')]),
-    p('premium-whey','Premium Whey','Brand not specified','Whey Protein',[v('premium-whey-227kg','', '2.27kg',6397.80,[78],'assets/products/kevin-levrone-anabolic-whey.jpg')]),
-    p('pre-workout-35-servings','Pre-Workout','Brand not specified','Pre-Workout',[v('pre-workout-35-servings','', '35 servings',1828.00,[79],'assets/products/psychotic-pre-workout.jpg')]),
+    p('nitro-whey','Nitro Whey','Brand not specified','Whey Protein',[v('nitro-whey-181kg','', '1.81kg',6577.81,[77])]),
+    p('premium-whey','Premium Whey','Brand not specified','Whey Protein',[v('premium-whey-227kg','', '2.27kg',6397.80,[78])]),
+    p('pre-workout-35-servings','Pre-Workout','Brand not specified','Pre-Workout',[v('pre-workout-35-servings','', '35 servings',1828.00,[79])]),
     p('king-whey-protein','King Whey Protein','Brand not specified','Whey Protein',[v('king-whey-protein-coffee-toffee-2lb','Coffee Toffee','2lb',3045.36,[80])]),
     p('pro-30-capsules','Pro','Brand not specified','Other Supplements',[v('pro-30-capsules','', '30 capsules',1977.15,[81])]),
     p('bcaa-unspecified','BCAA','Brand not specified','Amino Acids',[v('bcaa-unspecified', '', '',2045.99,[82])])
