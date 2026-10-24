@@ -153,13 +153,13 @@
     const text = [product.name,product.brand,product.category,...variants.flatMap(v => [v.flavor,v.origin,v.size])].join(' ').toLocaleLowerCase();
     return text.includes(query);
   }
-  function cardMarkup(product, variant, availableVariants, showBrand = true) {
+  function cardMarkup(product, variant, availableVariants, showBrand = true, showImageBrandTag = showBrand) {
     const familyVariantCount = product.variants.length;
     const matchedVariants = availableVariants || product.variants;
     const shownPrice = matchedVariants.length > 1 ? 'From ' + formatMoney(Math.min(...matchedVariants.map(v => v.price))) : formatMoney(variant.price);
     const optionNote = variantDescription(variant) || 'Variant details not supplied';
     const itemCount = familyVariantCount === 1 ? '1 variant' : familyVariantCount + ' variants';
-    const imageTag = showBrand && product.brand ? '<span class="image-brand-tag">' + esc(product.brand) + '</span>' : '';
+    const imageTag = showImageBrandTag && product.brand ? '<span class="image-brand-tag">' + esc(product.brand) + '</span>' : '';
     const brandLine = showBrand && product.brand ? '<div class="brand-line">' + esc(product.brand) + '</div>' : '';
     return '<article class="product-card">' +
       '<div class="product-image-box">' + imageTag + imageMarkup(product,variant,'product-image') + '</div>' +
@@ -213,17 +213,14 @@
     root.innerHTML = categories.map(category => {
       const categoryRows = rows.filter(row => row.product.category === category);
       if (!categoryRows.length) return '';
-      const brandGroups = new Map();
-      categoryRows.forEach(row => {
-        const brand = row.product.brand || '';
-        if (!brandGroups.has(brand)) brandGroups.set(brand,[]);
-        brandGroups.get(brand).push(row);
-      });
-      const groups = [...brandGroups.entries()].sort((a,b) => a[0].localeCompare(b[0],'en'));
+      const productSets = [];
+      for (let index = 0; index < categoryRows.length; index += 9) {
+        const set = categoryRows.slice(index,index + 9);
+        productSets.push('<div class="product-grid">' + set.map(row => cardMarkup(row.product,row.variant,row.variants,true,false)).join('') + '</div>');
+      }
       return '<section class="catalog-category" id="category-' + categorySlug(category) + '">' +
         '<div class="catalog-category-head"><h3>' + esc(category) + '</h3><span>' + categoryRows.length + (categoryRows.length === 1 ? ' product' : ' products') + '</span></div>' +
-        groups.map(([brand,brandRows]) => (brand ? '<h4 class="catalog-brand-head">' + esc(brand) + '</h4>' : '') +
-          '<div class="product-grid">' + brandRows.map(row => cardMarkup(row.product,row.variant,row.variants,false)).join('') + '</div>').join('') +
+        productSets.map(set => '<div class="catalog-product-set">' + set + '</div>').join('') +
         '</section>';
     }).join('');
     wireCardButtons(root);
