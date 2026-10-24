@@ -62,6 +62,8 @@
   const variantList = products.flatMap(product => product.variants.map(variant => ({ product, variant })));
   const variantById = new Map(variantList.map(row => [row.variant.id, row]));
   const productById = new Map(products.map(product => [product.id, product]));
+  const PAGE_SIZE = 9;
+  let currentPage = 1;
   const formatMoney = value => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:2,maximumFractionDigits:2}).format(value);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const unique = values => [...new Set(values)];
@@ -160,7 +162,8 @@
     const optionNote = variantDescription(variant) || 'Variant details not supplied';
     const itemCount = familyVariantCount === 1 ? '1 variant' : familyVariantCount + ' variants';
     const imageTag = showImageBrandTag && product.brand ? '<span class="image-brand-tag">' + esc(product.brand) + '</span>' : '';
-    const brandLine = showBrand && product.brand ? '<div class="brand-line">' + esc(product.brand) + '</div>' : '';
+    const brandLabel = [product.brand,product.category].filter(Boolean).join(' · ');
+    const brandLine = showBrand && brandLabel ? '<div class="brand-line">' + esc(brandLabel) + '</div>' : '';
     return '<article class="product-card">' +
       '<div class="product-image-box">' + imageTag + imageMarkup(product,variant,'product-image') + '</div>' +
       '<div class="card-content">' + brandLine +
@@ -208,34 +211,32 @@
     const root = $('catalogGrid');
     if (!rows.length) {
       root.innerHTML = '<div class="empty-results">No products match these filters.<br>Try clearing one or more filters.</div>';
+      $('catalogPagination').innerHTML = '';
       return;
     }
-    root.innerHTML = categories.map(category => {
-      const categoryRows = rows.filter(row => row.product.category === category);
-      if (!categoryRows.length) return '';
-      const productSets = [];
-      for (let index = 0; index < categoryRows.length; index += 9) {
-        const set = categoryRows.slice(index,index + 9);
-        productSets.push('<div class="product-grid">' + set.map(row => cardMarkup(row.product,row.variant,row.variants,true,false)).join('') + '</div>');
-      }
-      return '<section class="catalog-category" id="category-' + categorySlug(category) + '">' +
-        '<div class="catalog-category-head"><h3>' + esc(category) + '</h3><span>' + categoryRows.length + (categoryRows.length === 1 ? ' product' : ' products') + '</span></div>' +
-        productSets.map(set => '<div class="catalog-product-set">' + set + '</div>').join('') +
-        '</section>';
-    }).join('');
+    const totalPages = Math.ceil(rows.length / PAGE_SIZE);
+    currentPage = Math.min(currentPage,totalPages);
+    const pageRows = rows.slice((currentPage - 1) * PAGE_SIZE,currentPage * PAGE_SIZE);
+    root.innerHTML = '<div class="product-grid">' + pageRows.map(row => cardMarkup(row.product,row.variant,row.variants,true,false)).join('') + '</div>';
     wireCardButtons(root);
+    renderPagination(totalPages);
   }
-  function renderFeatured() {
-    const featuredRows = products.filter(product => product.featured).map(product => ({product,variant:product.variants.slice().sort((a,b) => a.price - b.price)[0]}));
-    renderCards($('featuredGrid'),featuredRows);
+  function renderPagination(totalPages) {
+    const root = $('catalogPagination');
+    if (totalPages < 2) { root.innerHTML = ''; return; }
+    root.innerHTML = '<button type="button" data-page-step="-1" ' + (currentPage === 1 ? 'disabled' : '') + '>Previous</button>' +
+      '<span>Page ' + currentPage + ' of ' + totalPages + '</span>' +
+      '<button type="button" data-page-step="1" ' + (currentPage === totalPages ? 'disabled' : '') + '>Next</button>';
+    root.querySelectorAll('[data-page-step]').forEach(button => button.addEventListener('click',() => {
+      currentPage += Number(button.dataset.pageStep);
+      renderCatalog();
+      $('catalog').scrollIntoView({behavior:'smooth',block:'start'});
+    }));
   }
   function setOptions(select, values, firstLabel) {
     const previous = select.value;
     select.innerHTML = '<option value="">' + esc(firstLabel) + '</option>' + values.map(value => '<option value="' + esc(value) + '">' + esc(value) + '</option>').join('');
     if (values.includes(previous)) select.value = previous;
-  }
-  function categorySlug(category) {
-    return category.toLocaleLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   }
   function initFilters() {
     const brands = unique(products.map(p => p.brand).filter(Boolean)).sort((a,b) => a.localeCompare(b,'en'));
@@ -246,12 +247,31 @@
     setOptions($('flavorFilter'),flavors,'All flavors');
     setOptions($('sizeFilter'),sizes,'All sizes');
     const strip = $('supplementCategories');
-    strip.innerHTML = '<span>Shop category</span><a class="category-chip active" href="#catalog" data-category="">All products</a>' + categories.map(category => '<a class="category-chip" href="#category-' + categorySlug(category) + '" data-category="' + esc(category) + '">' + esc(category) + '</a>').join('');
+    strip.innerHTML = '<span>Shop category</span><button class="category-chip active" type="button" data-category="">All products</button>' + categories.map(category => '<button class="category-chip" type="button" data-category="' + esc(category) + '">' + esc(category) + '</button>').join('');
+    strip.querySelectorAll('[data-category]').forEach(button => button.addEventListener('click',() => selectCategory(button.dataset.category)));
+    const categoryGrid = $('categoryGrid');
+    categoryGrid.innerHTML = categories.map(category => {
+      const count = products.filter(product => product.category === category).length;
+      return '<button class="category-card" type="button" data-category="' + esc(category) + '"><span class="category-card-name">' + esc(category) + '</span><span class="category-card-count">' + count + (count === 1 ? ' product' : ' products') + '</span><span class="category-card-arrow" aria-hidden="true">↗</span></button>';
+    }).join('');
+    categoryGrid.querySelectorAll('[data-category]').forEach(button => button.addEventListener('click',() => selectCategory(button.dataset.category)));
     $('catalogIntro').textContent = products.length + ' product listings · ' + variantList.length + ' catalog variants. Product details, flavors, sizes, and prices follow the supplied catalogue.';
   }
   function updateCategoryChip() {
     const value = $('categoryFilter').value;
     document.querySelectorAll('.category-chip').forEach(link => link.classList.toggle('active',link.dataset.category === value));
+  }
+  function selectCategory(category) {
+    $('searchInput').value = '';
+    $('brandFilter').value = '';
+    $('categoryFilter').value = category;
+    $('flavorFilter').value = '';
+    $('sizeFilter').value = '';
+    $('sortFilter').value = 'featured';
+    currentPage = 1;
+    updateCategoryChip();
+    renderCatalog();
+    location.hash = 'catalog';
   }
 
   function openDetail(productId,variantId,pushHash) {
@@ -377,14 +397,15 @@
     return 'https://wa.me/919952392499?text=' + encodeURIComponent(lines.join('\n'));
   }
 
-  function renderAll() { renderFeatured(); renderCatalog(); renderCart(); wireImageFallbacks(document); }
+  function renderAll() { renderCatalog(); renderCart(); wireImageFallbacks(document); }
 
-  $('searchInput').addEventListener('input',renderCatalog);
-  ['brandFilter','categoryFilter','flavorFilter','sizeFilter','sortFilter'].forEach(id => $(id).addEventListener('change',() => { if (id === 'categoryFilter') updateCategoryChip(); renderCatalog(); }));
+  $('searchInput').addEventListener('input',() => { currentPage = 1; renderCatalog(); });
+  ['brandFilter','categoryFilter','flavorFilter','sizeFilter','sortFilter'].forEach(id => $(id).addEventListener('change',() => { currentPage = 1; if (id === 'categoryFilter') updateCategoryChip(); renderCatalog(); }));
   $('clearFilters').addEventListener('click',() => {
     $('searchInput').value = '';
     ['brandFilter','categoryFilter','flavorFilter','sizeFilter'].forEach(id => $(id).value = '');
     $('sortFilter').value = 'featured';
+    currentPage = 1;
     updateCategoryChip(); renderCatalog();
   });
   $('openCart').addEventListener('click',openCart);
